@@ -64,7 +64,7 @@ def get_patch_dict(patch_dir):
 
     return sdict
 
-def process_dir_with_patches(dir):
+def process_dir_with_patches(dir, jira_issue):
     if not os.path.isdir(dir):
         raise NotADirectoryError('Wrong folder path passed:' + str(dir))
 
@@ -92,6 +92,10 @@ def process_dir_with_patches(dir):
 
         patch_path = os.path.join(dir, patch_file_name)
         msg = parse_commit_message_from_patch_file(patch_path)
+        if len(jira_issue) > 0 and jira_issue not in msg:
+            if  msg[-1] != '\n':
+                msg += '\n';
+            msg += jira_issue
         msg_file_name = '{0:03d}.msg'.format(patch_num)
         msg_file_path = os.path.join(commit_dir, msg_file_name)
         with open(msg_file_path, 'w') as msg_file:
@@ -109,7 +113,8 @@ def process_dir_with_patches(dir):
 
 if __name__ == '__main__':
     arg_parse = argparse.ArgumentParser(description='Utility to automate commiting of patch set')
-    arg_parse.add_argument('--path', help='folder with patch files')
+    arg_parse.add_argument('--path', help='folder with patch files', required=True)
+    arg_parse.add_argument('--jira_issue', help='JIRA issue reference to be added at the end of commit message', required=False)
     args = arg_parse.parse_args()
 
-    process_dir_with_patches(args.path)
+    process_dir_with_patches(args.path, args.jira_issue or "")
