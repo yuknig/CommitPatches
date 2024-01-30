@@ -17,9 +17,12 @@ def parse_commit_message_from_patch_file(patch_path):
         msg = msg[len('[PATCH]'):]
         msg = msg.strip()
 
-    # leave double line breaks only
+    # Remove unneeded line break
+    end_pos = msg.find('\n\n') # process to first double line break
+    if end_pos == -1:
+        end_pos = len(msg)
     lf_pos = 0
-    while True:
+    while lf_pos <= end_pos:
         lf_pos = msg.find('\n', lf_pos)
         if lf_pos == -1:
             break;
